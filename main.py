@@ -1,5 +1,6 @@
 
 import argparse
+import sys
 from src.ingest import load_and_split_pdf
 from src.vectorstore import build_vectorstore , load_vectorstore
 from src.query import query_documents
@@ -19,16 +20,25 @@ def main():
 
     if args.command == "ingest" :
         all_chunks = []
-        for pdf_path in args.pdf:
-            chunks = load_and_split_pdf(pdf_path)
-            all_chunks.extend(chunks)
-        build_vectorstore(all_chunks)
-        print(f"Indexed {len(all_chunks)} chunks from {len(args.pdf)} file(s)")
 
+        try:
+            for pdf_path in args.pdf:
+                chunks = load_and_split_pdf(pdf_path)
+                all_chunks.extend(chunks)
+            build_vectorstore(all_chunks)
+            print(f"Indexed {len(all_chunks)} chunks from {len(args.pdf)} file(s)")
+        except Exception as e:
+            print(f"error {e}")
+            sys.exit(1)
+    
     elif args.command == "query":
-        vectorstore = load_vectorstore()
-        answer = query_documents(vectorstore,args.question)
-        print(answer)
+        try:
+            vectorstore = load_vectorstore()
+            answer = query_documents(vectorstore,args.question)
+            print(answer)
+        except Exception as e:
+            print (f"Error {e}")
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()
